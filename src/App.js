@@ -1,80 +1,158 @@
-import { Box, ChakraProvider, SimpleGrid, Text, theme } from "@chakra-ui/react"
+import { Box, ChakraProvider, Checkbox, CheckboxGroup, Divider, Radio, RadioGroup, SimpleGrid, Text, theme, VStack } from "@chakra-ui/react"
 import { ColorModeSwitcher } from "./components/ColorModeSwitcher"
-import TvProviderCard from "./components/TvProviderCard"
 import { allPrograms } from "./data/allPrograms"
 import { artcom } from "./data/artcom"
 import { netia } from "./data/netia"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+
+const getPackages = (provider) => {
+  const providerName = provider.name
+  const packages = JSON.parse(JSON.stringify(provider.packages))
+  packages.forEach(el => {
+    el.name = `${providerName} ${el.name}`
+    el.extraPackages = provider.extraPackages
+  })
+  return packages
+}
+
+const packages = getPackages(netia).concat(getPackages(artcom))
 
 const App = () => {
 
-  const [packageNetia, setPackageNetia] = useState(-1)
-  const [extraPackageNetia, setExtraPackageNetia] = useState([])
-  const handlePackageChangeNetia = idx => setPackageNetia(idx)
-  const handleExtraPackageChangeNetia = idx => setExtraPackageNetia(idx)
+  const [firstProvider, setFirstProvider] = useState('0')
+  const [secondProvider, setSecondProvider] = useState('0')
+  const [firstExtraPackages, setFirstExtraPackages] = useState([])
+  const [secondExtraPackages, setSecondExtraPackages] = useState([])
 
-  const [packageArtcom, setPackageArtcom] = useState(-1)
-  const [extraPackageArtcom, setExtraPackageArtcom] = useState([])
-  const handlePackageChangeArtcom = idx => setPackageArtcom(idx)
-  const handleExtraPackageChangeArtcom = idx => setExtraPackageArtcom(idx)
+  const [chosenFEP, setChosenFEP] = useState([])
+  const [chosenSEP, setChosenSEP] = useState([])
 
-  let netiaProgramsDif
-  let netiaExtraPrograms 
-  let artcomProgramsDif
-  let netiaPrograms
-  let artcomPrograms
-  let diffrence
-  let diffrence2
+  const [diffrenceFP, setDiffrenceFP] = useState([])
+  const [diffrenceSP, setDiffrenceSP] = useState([])
 
-  if (packageNetia !== -1 && packageArtcom !== -1)
-  {
-    netiaExtraPrograms = []
-    extraPackageNetia.forEach(idx => netiaExtraPrograms = netiaExtraPrograms.concat(netia.extraPackages[idx].programs))
-    netiaPrograms = netia.packages[packageNetia].programs.concat(netiaExtraPrograms)
-    artcomPrograms = artcom.packages[packageArtcom].programs
-    netiaProgramsDif = netiaPrograms.filter(el => !artcom.packages[packageArtcom].programs.includes(el))
-    artcomProgramsDif = artcomPrograms.filter(el => !netia.packages[packageNetia].programs.includes(el))
-    diffrence = artcomProgramsDif.map(programId => (
+  useEffect(() => {
+    setFirstExtraPackages(packages[firstProvider].extraPackages)
+  }, [firstProvider])
+
+  useEffect(() => {
+    setSecondExtraPackages(packages[secondProvider].extraPackages)
+  }, [secondProvider])
+
+
+  useEffect(() => {
+    let programsF = []
+    let programsS = [] 
+
+    chosenFEP.forEach(idx => programsF = programsF.concat(packages[firstProvider].extraPackages[idx].programs))
+    programsF = programsF.concat(packages[firstProvider].programs)
+    programsF = [...new Set(programsF)]
+
+    chosenSEP.forEach(idx => programsS = programsS.concat(packages[secondProvider].extraPackages[idx].programs))
+    programsS = programsS.concat(packages[secondProvider].programs)
+    programsS = [...new Set(programsS)]
+
+    let programsFDif = programsF.filter(el => !programsS.includes(el))
+    let programsSDif = programsS.filter(el => !programsF.includes(el))
+
+    setDiffrenceFP(programsFDif.map(programId => (
       {
         "id": programId,
         "name": allPrograms.find(el => el.id === programId).name
       }
-    ))
-    diffrence2 = netiaProgramsDif.map(programId => (
+    )))
+
+    setDiffrenceSP(programsSDif.map(programId => (
       {
         "id": programId,
         "name": allPrograms.find(el => el.id === programId).name
       }
-    ))
-  }
-  
+    )))
 
-  
-
-  
+  }, [firstProvider, secondProvider, chosenFEP, chosenSEP])
 
   return (
     <ChakraProvider theme={theme}>
       <ColorModeSwitcher m='1'/>
-      <Box>
-        <SimpleGrid minChildWidth='320px' spacing='40px'>
-          <TvProviderCard provider={netia}
-            changePackage={(idx) => handlePackageChangeNetia(idx)}
-            changeExtraPackage={(idx) => handleExtraPackageChangeNetia(idx)}/>
-          <TvProviderCard provider={artcom}
-            changePackage={(idx) => handlePackageChangeArtcom(idx)}
-            changeExtraPackage={(idx) => handleExtraPackageChangeArtcom(idx)}/>
-            
-        </SimpleGrid>
-        W Artcom dodatkowo: 
-        {!!diffrence ? diffrence.map(el => <Text key={el.id}>{el.name}</Text>) : ("Nie ma różnicy")}
-        <hr />
-        W Netia dodatkowo: 
-        {!!diffrence2 ? diffrence2.map(el => <Text key={el.id}>{el.name}</Text>) : ("Nie ma różnicy")}
-        ----
-        {extraPackageNetia} {extraPackageArtcom}
-        
-      </Box>
+      <SimpleGrid minChildWidth='320px' spacing='4' m='4'>
+        <Box borderWidth='1px'
+        borderRadius='md'
+        boxShadow='sm' 
+        p='2'>
+          <RadioGroup
+          onChange={setFirstProvider}
+          value={firstProvider}>
+            <VStack align='left'>
+              {packages.map((pck, idx) => (
+                <Radio value={idx.toString()} key={idx}>{pck.name}</Radio>
+              ))}
+            </VStack>
+          </RadioGroup>
+          <Divider my='3' />
+          <VStack align='left'>
+            {firstExtraPackages.length ? (
+              <CheckboxGroup onChange={setChosenFEP}>
+                {firstExtraPackages.map((pck, idx) => (
+                  <Checkbox value={idx.toString()} key={idx}>{pck.name}</Checkbox>
+                ))}
+              </CheckboxGroup>
+            ) : (<Text>Brak dodatkowych pakietów</Text>)}
+          </VStack>
+        </Box>
+        <Box borderWidth='1px'
+        borderRadius='md'
+        boxShadow='sm' 
+        p='2'>
+          <RadioGroup
+          onChange={setSecondProvider}
+          value={secondProvider}>
+            <VStack align='left'>
+              {packages.map((pck, idx) => (
+                <Radio value={idx.toString()} key={idx}>{pck.name}</Radio>
+              ))}
+            </VStack>
+          </RadioGroup>
+          <Divider my='3' />
+          <VStack align='left'>
+            {secondExtraPackages.length ? (
+              <CheckboxGroup onChange={setChosenSEP}>
+                {secondExtraPackages.map((pck, idx) => (
+                  <Checkbox value={idx.toString()} key={idx}>{pck.name}</Checkbox>
+                ))}
+              </CheckboxGroup>
+            ) : (<Text>Brak dodatkowych pakietów</Text>)}
+          </VStack>
+        </Box>
+      </SimpleGrid>
+      <SimpleGrid minChildWidth='320px' spacing='4' m='4'>
+        <Box borderWidth='1px'
+          borderRadius='md'
+          boxShadow='sm' 
+          p='2'>
+            {diffrenceFP.length ? (
+              <>
+                <Text>Dodatkowo w {packages[firstProvider].name}</Text>
+                <Divider my='3' />
+                {diffrenceFP.map(pck => (
+                  <Text key={pck.id}>{pck.name}</Text>
+                ))}
+              </>
+            ) : (<Text>W tym pakiecie nie ma nic dodatkowego</Text>)}
+        </Box>
+        <Box borderWidth='1px'
+          borderRadius='md'
+          boxShadow='sm' 
+          p='2'>
+            {diffrenceSP.length ? (
+              <>
+                <Text>Dodatkowo w {packages[secondProvider].name}</Text>
+                <Divider my='3' />
+                {diffrenceSP.map(pck => (
+                  <Text key={pck.id}>{pck.name}</Text>
+                ))}
+              </>
+            ) : (<Text>W tym pakiecie nie ma nic dodatkowego</Text>)}
+        </Box>
+      </SimpleGrid>
     </ChakraProvider>
   )
 }
