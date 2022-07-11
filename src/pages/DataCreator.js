@@ -1,5 +1,5 @@
-import { AddIcon, ArrowBackIcon, ArrowForwardIcon, ArrowLeftIcon, ArrowRightIcon } from "@chakra-ui/icons"
-import { Box, Button, Input, Table, TableContainer, Text, Textarea, Thead, Tr, Th, Tbody, Td, IconButton, SimpleGrid, TableCaption, AlertIcon, Alert } from "@chakra-ui/react"
+import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons"
+import { Box, Button, Input, Table, TableContainer, Textarea, Thead, Tr, Th, Tbody, Td, IconButton, SimpleGrid, TableCaption, AlertIcon, Alert } from "@chakra-ui/react"
 import { useState } from "react"
 import { allPrograms } from "../data/allPrograms"
 
