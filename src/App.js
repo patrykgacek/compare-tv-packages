@@ -5,6 +5,7 @@ import { artcom } from "./data/artcom"
 import { netia } from "./data/netia"
 import { useEffect, useState } from "react"
 import DataCreator from "./pages/DataCreator"
+import { canalplusTmp } from "./data/canalplusTmp"
 
 const getPackages = (provider) => {
   const providerName = provider.name
@@ -16,7 +17,11 @@ const getPackages = (provider) => {
   return packages
 }
 
-const packages = getPackages(netia).concat(getPackages(artcom))
+const netiaAll = getPackages(netia)
+const artcomAll = getPackages(artcom)
+const canalplusTmpAll = getPackages(canalplusTmp)
+
+const packages = netiaAll.concat(artcomAll).concat(canalplusTmpAll)
 
 const App = () => {
 
@@ -30,6 +35,9 @@ const App = () => {
 
   const [diffrenceFP, setDiffrenceFP] = useState([])
   const [diffrenceSP, setDiffrenceSP] = useState([])
+
+  const [diffrence2FP, setDiffrence2FP] = useState([])
+  const [diffrence2SP, setDiffrence2SP] = useState([])
 
   const [showDataCreator, setShowDataCreator] = useState(false)
 
@@ -62,14 +70,49 @@ const App = () => {
         "id": programId,
         "name": allPrograms.find(el => el.id === programId).name
       }
-    )))
+    )).sort((a, b) => a.name.localeCompare(b.name)))
 
     setDiffrenceSP(programsSDif.map(programId => (
       {
         "id": programId,
         "name": allPrograms.find(el => el.id === programId).name
       }
-    )))
+    )).sort((a, b) => a.name.localeCompare(b.name)))
+
+
+    const allProgramsReduced = allPrograms.filter(program => programsF.includes(program.id) || programsS.includes(program.id))
+
+    setDiffrence2FP(allProgramsReduced.map(program => {
+      let color = ''
+      if (programsF.includes(program.id) && programsS.includes(program.id)) {
+        color = ''
+      } else {
+        color = !programsS.includes(program.id) ? 'green.400' : 'red.400'
+      }
+      
+      return ({
+        "id": program.id,
+        "name": program.name,
+        "color": color
+      })
+    }).sort((a, b) => a.name.localeCompare(b.name)))
+
+    setDiffrence2SP(allProgramsReduced.map(program => {
+      let color = ''
+      if (programsF.includes(program.id) && programsS.includes(program.id)) {
+        color = ''
+      } else {
+        color = !programsF.includes(program.id) ? 'green.400' : 'red.400'
+      }
+
+      
+      return ({
+        "id": program.id,
+        "name": program.name,
+        "color": color
+      })
+    }).sort((a, b) => a.name.localeCompare(b.name)))
+
 
   }, [firstProvider, secondProvider, chosenFEP, chosenSEP])
 
@@ -157,6 +200,36 @@ const App = () => {
                     ))}
                   </>
                 ) : (<Text>W tym pakiecie nie ma nic dodatkowego</Text>)}
+            </Box>
+          </SimpleGrid>
+          <SimpleGrid minChildWidth='320px' spacing='4' my='4'>
+            <Box borderWidth='1px'
+              borderRadius='md'
+              boxShadow='sm' 
+              p='2'>
+                {diffrence2FP.length ? (
+                  <>
+                    <Text>Porównanie {packages[firstProvider].name}</Text>
+                    <Divider my='3' />
+                    {diffrence2FP.map(pck => (
+                      <Text key={pck.id} color={pck.color}>{pck.name}</Text>
+                    ))}
+                  </>
+                ) : (<Text>Pakiet nie zawiera programów</Text>)}
+            </Box>
+            <Box borderWidth='1px'
+              borderRadius='md'
+              boxShadow='sm' 
+              p='2'>
+                {diffrence2SP.length ? (
+                  <>
+                    <Text>Porównanie {packages[secondProvider].name}</Text>
+                    <Divider my='3' />
+                    {diffrence2SP.map(pck => (
+                      <Text key={pck.id} color={pck.color}>{pck.name}</Text>
+                    ))}
+                  </>
+                ) : (<Text>Pakiet nie zawiera programów</Text>)}
             </Box>
           </SimpleGrid>
           <FormControl display='flex' alignItems='center'>
