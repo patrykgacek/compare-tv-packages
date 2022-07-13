@@ -1,237 +1,129 @@
-import { Box, ChakraProvider, Checkbox, CheckboxGroup, Divider, FormControl, FormLabel, Radio, RadioGroup, SimpleGrid, Switch, Text, theme, VStack } from "@chakra-ui/react"
+import { Box, ChakraProvider, FormControl, FormLabel, Heading, HStack, SimpleGrid, Switch, theme, } from "@chakra-ui/react"
 import { ColorModeSwitcher } from "./components/ColorModeSwitcher"
 import { allPrograms } from "./data/allPrograms"
-import { artcom } from "./data/artcom"
-import { netia } from "./data/netia"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import DataCreator from "./pages/DataCreator"
-import { canalplusTmp } from "./data/canalplusTmp"
-
-const getPackages = (provider) => {
-  const providerName = provider.name
-  const packages = JSON.parse(JSON.stringify(provider.packages))
-  packages.forEach(el => {
-    el.name = `${providerName} ${el.name}`
-    el.extraPackages = provider.extraPackages
-  })
-  return packages
-}
-
-const netiaAll = getPackages(netia)
-const artcomAll = getPackages(artcom)
-const canalplusTmpAll = getPackages(canalplusTmp)
-
-const packages = netiaAll.concat(artcomAll).concat(canalplusTmpAll)
+import PackageSelection from "./components/PackageSelection"
+import ProgramsList from "./components/ProgramsList"
+import { packages } from "./functions"
 
 const App = () => {
-
-  const [firstProvider, setFirstProvider] = useState('0')
-  const [secondProvider, setSecondProvider] = useState('0')
-  const [firstExtraPackages, setFirstExtraPackages] = useState([])
-  const [secondExtraPackages, setSecondExtraPackages] = useState([])
-
-  const [chosenFEP, setChosenFEP] = useState([])
-  const [chosenSEP, setChosenSEP] = useState([])
-
   const [diffrenceFP, setDiffrenceFP] = useState([])
   const [diffrenceSP, setDiffrenceSP] = useState([])
 
-  const [diffrence2FP, setDiffrence2FP] = useState([])
-  const [diffrence2SP, setDiffrence2SP] = useState([])
+  const [comparisonFP, setComparisonFP] = useState([])
+  const [comparisonSP, setComparisonSP] = useState([])
 
   const [showDataCreator, setShowDataCreator] = useState(false)
 
-  useEffect(() => {
-    setFirstExtraPackages(packages[firstProvider].extraPackages)
-  }, [firstProvider])
+  const [programsFirst, setProgramsFirst] = useState([])
+  const [programsSecond, setProgramsSecond] = useState([])
 
-  useEffect(() => {
-    setSecondExtraPackages(packages[secondProvider].extraPackages)
-  }, [secondProvider])
+  const [nameFirst, setNameFirst] = useState('')
+  const [nameSecond, setNameSecond] = useState('')
 
+  const updateSelectFirst = programs => {
+    setProgramsFirst(programs)
+    recalculate(programs, programsSecond)
+  }
 
-  useEffect(() => {
-    let programsF = []
-    let programsS = [] 
+  const updateSelectSecond = programs => {
+    setProgramsSecond(programs)
+    recalculate(programsFirst, programs)
+  }
 
-    chosenFEP.forEach(idx => programsF = programsF.concat(packages[firstProvider].extraPackages[idx].programs))
-    programsF = programsF.concat(packages[firstProvider].programs)
-    programsF = [...new Set(programsF)]
-
-    chosenSEP.forEach(idx => programsS = programsS.concat(packages[secondProvider].extraPackages[idx].programs))
-    programsS = programsS.concat(packages[secondProvider].programs)
-    programsS = [...new Set(programsS)]
-
+  const recalculate = (programsF, programsS) => {
     let programsFDif = programsF.filter(el => !programsS.includes(el))
     let programsSDif = programsS.filter(el => !programsF.includes(el))
 
     setDiffrenceFP(programsFDif.map(programId => (
       {
         "id": programId,
-        "name": allPrograms.find(el => el.id === programId).name
+        "name": allPrograms.find(el => el.id === programId).name,
+        "color": ''
       }
     )).sort((a, b) => a.name.localeCompare(b.name)))
 
     setDiffrenceSP(programsSDif.map(programId => (
       {
         "id": programId,
-        "name": allPrograms.find(el => el.id === programId).name
+        "name": allPrograms.find(el => el.id === programId).name,
+        "color": ''
       }
     )).sort((a, b) => a.name.localeCompare(b.name)))
 
 
-    const allProgramsReduced = allPrograms.filter(program => programsF.includes(program.id) || programsS.includes(program.id))
-
-    setDiffrence2FP(allProgramsReduced.map(program => {
-      let color = ''
-      if (programsF.includes(program.id) && programsS.includes(program.id)) {
-        color = ''
-      } else {
-        color = !programsS.includes(program.id) ? 'green.400' : 'red.400'
-      }
-      
-      return ({
+    const programsIntersection = allPrograms
+      .filter(program => programsF.includes(program.id) && programsS.includes(program.id))
+      .map(program => ({
         "id": program.id,
         "name": program.name,
-        "color": color
-      })
-    }).sort((a, b) => a.name.localeCompare(b.name)))
+        "color": ''
+      }))
 
-    setDiffrence2SP(allProgramsReduced.map(program => {
-      let color = ''
-      if (programsF.includes(program.id) && programsS.includes(program.id)) {
-        color = ''
-      } else {
-        color = !programsF.includes(program.id) ? 'green.400' : 'red.400'
-      }
+    setComparisonFP(programsIntersection
+      .concat(programsFDif.map(programId => (
+        {
+          "id": programId,
+          "name": allPrograms.find(el => el.id === programId).name,
+          "color": 'green.400'
+        }
+      )))
+      .concat(programsSDif.map(programId => (
+        {
+          "id": programId,
+          "name": allPrograms.find(el => el.id === programId).name,
+          "color": 'red.400'
+        }
+      )))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    )
 
-      
-      return ({
-        "id": program.id,
-        "name": program.name,
-        "color": color
-      })
-    }).sort((a, b) => a.name.localeCompare(b.name)))
-
-
-  }, [firstProvider, secondProvider, chosenFEP, chosenSEP])
-
+    setComparisonSP(programsIntersection
+      .concat(programsFDif.map(programId => (
+        {
+          "id": programId,
+          "name": allPrograms.find(el => el.id === programId).name,
+          "color": 'red.400'
+        }
+      )))
+      .concat(programsSDif.map(programId => (
+        {
+          "id": programId,
+          "name": allPrograms.find(el => el.id === programId).name,
+          "color": 'green.400'
+        }
+      )))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    )
+  }
 
 
   return (
     <ChakraProvider theme={theme}>
-      <ColorModeSwitcher m='1'/>
+      <HStack>
+        <ColorModeSwitcher m='1'/>
+        <Heading as='h1' size='md'>Porównywarka pakietów telewizyjnych</Heading>
+      </HStack>
       <Box m='4'>
-      <SimpleGrid minChildWidth='320px' spacing='4'>
-            <Box borderWidth='1px'
-            borderRadius='md'
-            boxShadow='sm' 
-            p='2'>
-              <RadioGroup
-              onChange={setFirstProvider}
-              value={firstProvider}>
-                <VStack align='left'>
-                  {packages.map((pck, idx) => (
-                    <Radio value={idx.toString()} key={idx}>{pck.name}</Radio>
-                  ))}
-                </VStack>
-              </RadioGroup>
-              <Divider my='3' />
-              <VStack align='left'>
-                {firstExtraPackages.length ? (
-                  <CheckboxGroup onChange={setChosenFEP}>
-                    {firstExtraPackages.map((pck, idx) => (
-                      <Checkbox value={idx.toString()} key={idx}>{pck.name}</Checkbox>
-                    ))}
-                  </CheckboxGroup>
-                ) : (<Text>Brak dodatkowych pakietów</Text>)}
-              </VStack>
-            </Box>
-            <Box borderWidth='1px'
-            borderRadius='md'
-            boxShadow='sm' 
-            p='2'>
-              <RadioGroup
-              onChange={setSecondProvider}
-              value={secondProvider}>
-                <VStack align='left'>
-                  {packages.map((pck, idx) => (
-                    <Radio value={idx.toString()} key={idx}>{pck.name}</Radio>
-                  ))}
-                </VStack>
-              </RadioGroup>
-              <Divider my='3' />
-              <VStack align='left'>
-                {secondExtraPackages.length ? (
-                  <CheckboxGroup onChange={setChosenSEP}>
-                    {secondExtraPackages.map((pck, idx) => (
-                      <Checkbox value={idx.toString()} key={idx}>{pck.name}</Checkbox>
-                    ))}
-                  </CheckboxGroup>
-                ) : (<Text>Brak dodatkowych pakietów</Text>)}
-              </VStack>
-            </Box>
+          <SimpleGrid minChildWidth='280px' spacing='4'>
+            <PackageSelection packages={packages} updateSelect={updateSelectFirst} selectedName={setNameFirst}>Pierwszy pakiet</PackageSelection>
+            <PackageSelection packages={packages} updateSelect={updateSelectSecond}  selectedName={setNameSecond}>Drugi pakiet</PackageSelection>
           </SimpleGrid>
-          <SimpleGrid minChildWidth='320px' spacing='4' my='4'>
-            <Box borderWidth='1px'
-              borderRadius='md'
-              boxShadow='sm' 
-              p='2'>
-                {diffrenceFP.length ? (
-                  <>
-                    <Text>Dodatkowo w {packages[firstProvider].name}</Text>
-                    <Divider my='3' />
-                    {diffrenceFP.map(pck => (
-                      <Text key={pck.id}>{pck.name}</Text>
-                    ))}
-                  </>
-                ) : (<Text>W tym pakiecie nie ma nic dodatkowego</Text>)}
-            </Box>
-            <Box borderWidth='1px'
-              borderRadius='md'
-              boxShadow='sm' 
-              p='2'>
-                {diffrenceSP.length ? (
-                  <>
-                    <Text>Dodatkowo w {packages[secondProvider].name}</Text>
-                    <Divider my='3' />
-                    {diffrenceSP.map(pck => (
-                      <Text key={pck.id}>{pck.name}</Text>
-                    ))}
-                  </>
-                ) : (<Text>W tym pakiecie nie ma nic dodatkowego</Text>)}
-            </Box>
-          </SimpleGrid>
-          <SimpleGrid minChildWidth='320px' spacing='4' my='4'>
-            <Box borderWidth='1px'
-              borderRadius='md'
-              boxShadow='sm' 
-              p='2'>
-                {diffrence2FP.length ? (
-                  <>
-                    <Text>Porównanie {packages[firstProvider].name}</Text>
-                    <Divider my='3' />
-                    {diffrence2FP.map(pck => (
-                      <Text key={pck.id} color={pck.color}>{pck.name}</Text>
-                    ))}
-                  </>
-                ) : (<Text>Pakiet nie zawiera programów</Text>)}
-            </Box>
-            <Box borderWidth='1px'
-              borderRadius='md'
-              boxShadow='sm' 
-              p='2'>
-                {diffrence2SP.length ? (
-                  <>
-                    <Text>Porównanie {packages[secondProvider].name}</Text>
-                    <Divider my='3' />
-                    {diffrence2SP.map(pck => (
-                      <Text key={pck.id} color={pck.color}>{pck.name}</Text>
-                    ))}
-                  </>
-                ) : (<Text>Pakiet nie zawiera programów</Text>)}
-            </Box>
-          </SimpleGrid>
+          {!!nameSecond && !!nameFirst && (
+            <>
+            <SimpleGrid minChildWidth='280px' spacing='4' my='4'>
+              <SimpleGrid minChildWidth='120px' spacing='4'>
+                <ProgramsList programs={diffrenceFP}>Dodatkowo w pierwszym pakiecie</ProgramsList>
+                <ProgramsList programs={diffrenceSP}>Dodatkowo w drugim pakiecie</ProgramsList>
+              </SimpleGrid>
+              <SimpleGrid minChildWidth='120px' spacing='4'>
+                <ProgramsList programs={comparisonFP}>Programy w pierwszym pakiecie</ProgramsList>
+                <ProgramsList programs={comparisonSP}>Programy w drugim pakiecie {nameFirst}</ProgramsList>
+              </SimpleGrid>
+            </SimpleGrid>
+            </>
+          )}
           <FormControl display='flex' alignItems='center'>
             <FormLabel htmlFor='toggle-creator' mb='0'>
               Pokaż kreator programów (opcja programistyczna)
