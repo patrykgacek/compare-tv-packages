@@ -1,4 +1,9 @@
+# Porównywarka pakietów telewizyjnych
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Demo
+[Link](https://inspiring-sunflower-49b929.netlify.app/)
 
 ## Available Scripts
 
