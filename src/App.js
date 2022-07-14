@@ -119,7 +119,7 @@ const App = () => {
               </SimpleGrid>
               <SimpleGrid minChildWidth='120px' spacing='4'>
                 <ProgramsList programs={comparisonFP}>Programy w pierwszym pakiecie</ProgramsList>
-                <ProgramsList programs={comparisonSP}>Programy w drugim pakiecie {nameFirst}</ProgramsList>
+                <ProgramsList programs={comparisonSP}>Programy w drugim pakiecie</ProgramsList>
               </SimpleGrid>
             </SimpleGrid>
             </>
