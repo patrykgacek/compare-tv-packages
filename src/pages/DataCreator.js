@@ -100,7 +100,7 @@ const DataCreator = () => {
             <Tbody>
               {data
               .filter(program => program.name.toLowerCase().includes(search.toLowerCase()))
-              // .sort((a, b) => a.name.localeCompare(b.name))
+              .sort((a, b) => a.name.localeCompare(b.name))
               .map(program => (
                 <Tr key={program.id}>
                   <Td>{program.id}</Td>
@@ -124,7 +124,7 @@ const DataCreator = () => {
             <Tbody>
               {providerData
               .filter(program => program.name.toLowerCase().includes(search.toLowerCase()))
-              // .sort((a, b) => a.name.localeCompare(b.name))
+              .sort((a, b) => a.name.localeCompare(b.name))
               .map(program => (
                 <Tr key={program.id}>
                   <Td>{program.id}</Td>
