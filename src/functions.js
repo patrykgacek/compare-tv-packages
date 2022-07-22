@@ -1,6 +1,4 @@
-import { artcom } from "./data/artcom"
 import { netia } from "./data/netia"
-import { canalplusTmp } from "./data/canalplusTmp"
 import { upc } from "./data/upc"
 
 export const getPackages = (provider) => {
@@ -15,10 +13,8 @@ export const getPackages = (provider) => {
 
 export const preparePrograms = () => {
   const netiaAll = getPackages(netia)
-  const artcomAll = getPackages(artcom)
-  const canalplusTmpAll = getPackages(canalplusTmp)
   const upcAll = getPackages(upc)
-  return netiaAll.concat(artcomAll).concat(canalplusTmpAll).concat(upcAll)
+  return netiaAll.concat(upcAll)
 }
 
 export const packages = preparePrograms()
