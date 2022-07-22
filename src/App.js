@@ -53,7 +53,8 @@ const App = () => {
     )).sort((a, b) => a.name.localeCompare(b.name)))
 
 
-    const programsIntersection = allPrograms
+    const programsIntersection = 
+      allPrograms
       .filter(program => programsF.includes(program.id) && programsS.includes(program.id))
       .map(program => ({
         "id": program.id,
@@ -61,7 +62,8 @@ const App = () => {
         "color": ''
       }))
 
-    setComparisonFP(programsIntersection
+    setComparisonFP(
+      programsIntersection
       .concat(programsFDif.map(programId => (
         {
           "id": programId,
@@ -79,7 +81,8 @@ const App = () => {
       .sort((a, b) => a.name.localeCompare(b.name))
     )
 
-    setComparisonSP(programsIntersection
+    setComparisonSP(
+      programsIntersection
       .concat(programsFDif.map(programId => (
         {
           "id": programId,
@@ -98,7 +101,6 @@ const App = () => {
     )
   }
 
-
   return (
     <ChakraProvider theme={theme}>
       <HStack>
@@ -114,17 +116,17 @@ const App = () => {
             <>
             <SimpleGrid minChildWidth='280px' spacing='4' my='4'>
               <SimpleGrid minChildWidth='120px' spacing='4'>
-                <ProgramsList programs={diffrenceFP}>Dodatkowo w pierwszym pakiecie</ProgramsList>
-                <ProgramsList programs={diffrenceSP}>Dodatkowo w drugim pakiecie</ProgramsList>
+                <ProgramsList programs={diffrenceFP}>Dodatkowo w {nameFirst}</ProgramsList>
+                <ProgramsList programs={diffrenceSP}>Dodatkowo w {nameSecond}</ProgramsList>
               </SimpleGrid>
               <SimpleGrid minChildWidth='120px' spacing='4'>
-                <ProgramsList programs={comparisonFP}>Programy w pierwszym pakiecie</ProgramsList>
-                <ProgramsList programs={comparisonSP}>Programy w drugim pakiecie</ProgramsList>
+                <ProgramsList programs={comparisonFP}>Programy w {nameFirst}</ProgramsList>
+                <ProgramsList programs={comparisonSP}>Programy w {nameSecond}</ProgramsList>
               </SimpleGrid>
             </SimpleGrid>
             </>
           )}
-          <FormControl display='flex' alignItems='center'>
+          <FormControl display='flex' alignItems='center' my='4'>
             <FormLabel htmlFor='toggle-creator' mb='0'>
               Pokaż kreator programów (opcja programistyczna)
             </FormLabel>
